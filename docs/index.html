@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GPS-CLIP · Grounded Positive Supervision for Compositional CLIP</title>
+<meta name="description" content="GPS-CLIP improves compositional reasoning in CLIP with grounded region and relation positives instead of hard negatives. NeurIPS 2026.">
+<meta property="og:title" content="GPS-CLIP: Beyond Hard Negatives (NeurIPS 2026)">
+<meta property="og:description" content="Grounded positive supervision for compositional CLIP. Same architecture, no extra inference cost.">
+<meta property="og:image" content="static/images/method.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,700&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&family=IBM+Plex+Mono:wght@400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --paper: #f5f7f9;
+    --sheet: #ffffff;
+    --ink: #17212e;
+    --muted: #5b6575;
+    --rule: #dbe0e7;
+    --pos: #2f7d5c;
+    --pos-tint: #dcefe4;
+    --neg: #d4573f;
+    --neg-tint: #f8e1db;
+    --base: #9aa3b1;
+    /* scene-graph legend colours, taken from Fig. 2 of the paper */
+    --c-region: #cfe0f5;
+    --c-sub: #f6d2d6;
+    --c-triplet: #d6ecca;
+    --c-caption: #fbecb4;
+    --c-image: #fad8b4;
+    --sans: "Bricolage Grotesque", system-ui, sans-serif;
+    --serif: "Source Serif 4", Georgia, serif;
+    --mono: "IBM Plex Mono", ui-monospace, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --paper: #12161c;
+      --sheet: #1a1f27;
+      --ink: #e8ecf1;
+      --muted: #a0a9b6;
+      --rule: #2c333d;
+      --pos: #6cc39b;
+      --pos-tint: #1d3329;
+      --neg: #f08a73;
+      --neg-tint: #3a2421;
+      --base: #6c7684;
+      --c-region: #2a3b52;
+      --c-sub: #4a2b31;
+      --c-triplet: #2d4127;
+      --c-caption: #4a4122;
+      --c-image: #4c3620;
+    }
+  }
+
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--serif);
+    font-size: 18px;
+    line-height: 1.7;
+    -webkit-font-smoothing: antialiased;
+  }
+  img { max-width: 100%; display: block; }
+  a { color: inherit; text-underline-offset: 3px; text-decoration-thickness: 1px; }
+  a:hover { color: var(--pos); }
+  :focus-visible { outline: 2px solid var(--pos); outline-offset: 3px; border-radius: 4px; }
+
+  .wide { max-width: 1080px; margin: 0 auto; padding: 0 24px; }
+  .read { max-width: 680px; }
+
+  /* ---------- header ---------- */
+  header.wide { padding-top: 72px; padding-bottom: 36px; }
+  .venue { font-family: var(--sans); font-size: 15px; color: var(--muted); margin: 0 0 18px; }
+  .venue strong { color: var(--ink); font-weight: 600; }
+  h1 {
+    font-family: var(--sans);
+    font-weight: 700;
+    font-size: clamp(38px, 6.4vw, 76px);
+    line-height: 1.02;
+    letter-spacing: -0.03em;
+    margin: 0;
+    max-width: 15ch;
+  }
+  .sub {
+    font-family: var(--sans);
+    font-weight: 400;
+    font-size: clamp(20px, 2.6vw, 28px);
+    line-height: 1.3;
+    letter-spacing: -0.01em;
+    color: var(--muted);
+    margin: 14px 0 34px;
+    max-width: 30ch;
+  }
+  .authors { font-family: var(--sans); font-size: 18px; display: flex; flex-wrap: wrap; gap: 4px 26px; }
+  .authors sup { color: var(--muted); font-size: 0.65em; margin-left: 1px; }
+  .affil { font-family: var(--sans); font-size: 14.5px; color: var(--muted); margin-top: 8px; display: flex; flex-wrap: wrap; gap: 2px 22px; }
+
+  .links { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 30px; }
+  .link {
+    font-family: var(--sans); font-size: 15.5px; font-weight: 600;
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 10px 18px 10px 16px; border-radius: 10px;
+    text-decoration: none;
+    background: var(--ink); color: var(--paper);
+  }
+  .link:hover { color: var(--paper); background: var(--pos); }
+  .link svg { width: 18px; height: 18px; flex: none; }
+  .link.pending { background: transparent; color: var(--muted); box-shadow: inset 0 0 0 1px var(--rule); cursor: default; }
+  .link.pending:hover { background: transparent; color: var(--muted); }
+  .link.quiet { background: transparent; color: var(--ink); box-shadow: inset 0 0 0 1px var(--ink); }
+  .link.quiet:hover { background: var(--ink); color: var(--paper); }
+
+  /* ---------- the probe (signature element) ---------- */
+  .probe {
+    margin-top: 44px;
+    background: var(--sheet);
+    border-radius: 18px;
+    box-shadow: 0 0 0 1px var(--rule);
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  }
+  .probe-left { padding: 30px 30px 28px; border-right: 1px solid var(--rule); }
+  .probe-right { padding: 30px 30px 28px; display: flex; flex-direction: column; }
+  .probe h2 { font-family: var(--sans); font-size: 24px; font-weight: 600; letter-spacing: -0.01em; margin: 0 0 4px; line-height: 1.25; }
+  .probe .hint { font-family: var(--sans); color: var(--muted); font-size: 15px; margin: 0 0 20px; line-height: 1.5; }
+
+  .scene { display: flex; gap: 18px; align-items: flex-start; }
+  .scene img { width: 150px; height: 150px; object-fit: cover; border-radius: 10px; flex: none; }
+  .switch { display: flex; flex-direction: column; gap: 8px; }
+  .switch button {
+    width: 58px; height: 58px; padding: 0; border: 0; border-radius: 8px; cursor: pointer;
+    background: none; opacity: .45; transition: opacity .2s;
+  }
+  .switch button img { width: 58px; height: 58px; border-radius: 8px; object-fit: cover; }
+  .switch button[aria-pressed="true"] { opacity: 1; box-shadow: 0 0 0 2px var(--ink); }
+  .switch button:hover { opacity: 1; }
+
+  .captions { display: grid; gap: 10px; margin-top: 20px; }
+  .cap {
+    text-align: left; width: 100%;
+    font-family: var(--serif); font-size: 16.5px; line-height: 1.5; color: var(--ink);
+    background: var(--paper); border: 1px solid var(--rule); border-radius: 12px;
+    padding: 12px 16px 13px 46px; cursor: pointer; position: relative;
+    transition: border-color .2s, background .2s;
+  }
+  .cap:hover:not(:disabled) { border-color: var(--ink); }
+  .cap .key {
+    position: absolute; left: 14px; top: 12px;
+    font-family: var(--sans); font-weight: 700; font-size: 14px;
+    width: 22px; height: 22px; border-radius: 6px; display: grid; place-items: center;
+    background: var(--rule); color: var(--ink);
+  }
+  .cap:disabled { cursor: default; }
+  .cap.right { background: var(--pos-tint); border-color: var(--pos); }
+  .cap.right .key { background: var(--pos); color: var(--sheet); }
+  .cap.wrong { background: var(--neg-tint); border-color: transparent; opacity: .8; }
+  .cap.wrong .key { background: var(--neg); color: var(--sheet); }
+
+  .verdict { font-family: var(--sans); font-size: 15px; min-height: 24px; margin-top: 12px; color: var(--muted); }
+
+  .bars { display: grid; gap: 14px; margin-top: 28px; align-content: start; min-height: 190px; }
+  .probe-right .axis { margin-top: 10px; }
+  .probe-note { margin-top: auto !important; padding-top: 18px; }
+  .row { display: grid; grid-template-columns: 92px 1fr 74px; align-items: center; gap: 12px; font-family: var(--sans); }
+  .row .name { font-size: 15px; text-align: right; color: var(--muted); }
+  .row.ours .name { color: var(--ink); font-weight: 700; }
+  .track { position: relative; height: 30px; }
+  .track::before { content: ""; position: absolute; left: 50%; top: -6px; bottom: -6px; width: 1px; background: var(--rule); }
+  .bar {
+    position: absolute; top: 4px; height: 22px; border-radius: 5px; width: 0;
+    transition: width .7s cubic-bezier(.2,.8,.2,1), left .7s cubic-bezier(.2,.8,.2,1);
+  }
+  .bar.p { background: var(--pos); left: 50%; }
+  .bar.n {
+    background: repeating-linear-gradient(-45deg, var(--neg) 0 5px, color-mix(in srgb, var(--neg) 70%, var(--sheet)) 5px 9px);
+  }
+  .val {
+    text-align: right; font-size: 13.5px; font-variant-numeric: tabular-nums; white-space: nowrap;
+    opacity: 0; transition: opacity .3s .5s;
+  }
+  .revealed .val { opacity: 1; }
+  .axis { display: grid; grid-template-columns: 92px 1fr 74px; gap: 12px; font-family: var(--sans); font-size: 13px; color: var(--muted); margin-top: 6px; }
+  .axis div { display: flex; justify-content: space-between; }
+  .bars-empty { font-family: var(--sans); color: var(--muted); font-size: 15px; text-align: center; padding: 8px 0 0; }
+  .probe-note { font-family: var(--sans); font-size: 13.5px; color: var(--muted); margin: 18px 0 0; line-height: 1.5; }
+
+  /* ---------- sections ---------- */
+  section { padding: 76px 0 0; }
+  section h2 {
+    font-family: var(--sans); font-weight: 700; letter-spacing: -0.02em;
+    font-size: clamp(28px, 3.6vw, 40px); line-height: 1.1; margin: 0 0 22px;
+  }
+  section p { margin: 0 0 18px; }
+  .lede { font-size: 21px; line-height: 1.6; }
+
+  figure { margin: 34px 0 0; }
+  .plate { background: #fff; border-radius: 16px; padding: 22px; box-shadow: 0 0 0 1px var(--rule); }
+  figcaption { font-family: var(--sans); font-size: 15px; color: var(--muted); line-height: 1.55; margin-top: 14px; max-width: 760px; }
+  figcaption b { color: var(--ink); font-weight: 600; }
+  .plate a { display: block; cursor: zoom-in; }
+
+  .losses { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0; margin-top: 34px; border-top: 1px solid var(--rule); }
+  .loss { padding: 22px 26px 6px 0; }
+  .loss + .loss { padding-left: 26px; border-left: 1px solid var(--rule); }
+  .loss h3 { font-family: var(--sans); font-size: 19px; font-weight: 600; margin: 0 0 8px; display: flex; align-items: center; gap: 10px; }
+  .loss h3 i { width: 14px; height: 14px; border-radius: 4px; flex: none; }
+  .loss p { font-size: 16.5px; line-height: 1.6; color: var(--muted); }
+  .loss .eq { font-family: var(--serif); font-style: italic; color: var(--ink); }
+
+  .key-row { display: flex; flex-wrap: wrap; gap: 8px 22px; font-family: var(--sans); font-size: 15px; margin-top: 18px; }
+  .key-row span { display: inline-flex; align-items: center; gap: 8px; }
+  .key-row i { width: 14px; height: 14px; border-radius: 4px; }
+
+  /* results dot plot */
+  .dots { margin-top: 30px; font-family: var(--sans); }
+  .dots-legend { display: flex; gap: 22px; font-size: 14.5px; color: var(--muted); margin-bottom: 14px; }
+  .dots-legend span { display: inline-flex; align-items: center; gap: 8px; }
+  .dot-key { width: 12px; height: 12px; border-radius: 50%; }
+  .drow { display: grid; grid-template-columns: 190px 1fr 70px; gap: 16px; align-items: center; padding: 9px 0; border-top: 1px solid var(--rule); }
+  .drow:last-child { border-bottom: 1px solid var(--rule); }
+  .drow .lab { font-size: 15.5px; }
+  .drow .lab small { display: block; color: var(--muted); font-size: 13px; }
+  .line { position: relative; height: 22px; }
+  .line::before { content: ""; position: absolute; left: 0; right: 0; top: 50%; height: 1px; background: var(--rule); }
+  .seg { position: absolute; top: calc(50% - 2px); height: 4px; background: var(--pos-tint); border-radius: 2px; }
+  .dot { position: absolute; top: 50%; width: 13px; height: 13px; border-radius: 50%; transform: translate(-50%, -50%); }
+  .dot.b { background: var(--base); }
+  .dot.g { background: var(--pos); width: 15px; height: 15px; }
+  .delta { text-align: right; font-weight: 600; color: var(--pos); font-variant-numeric: tabular-nums; font-size: 15.5px; }
+  .ticks { display: grid; grid-template-columns: 190px 1fr 70px; gap: 16px; font-size: 12.5px; color: var(--muted); padding-top: 6px; }
+  .ticks div { display: flex; justify-content: space-between; }
+  .small-note { font-family: var(--sans); font-size: 14.5px; color: var(--muted); margin-top: 16px; }
+
+  .facts { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 40px; }
+  .facts li { padding: 14px 0; border-top: 1px solid var(--rule); font-size: 17px; line-height: 1.55; }
+  .facts b { font-family: var(--sans); font-weight: 600; display: block; font-size: 17px; margin-bottom: 2px; }
+
+  .bib { position: relative; margin-top: 8px; }
+  .bib pre {
+    font-family: var(--mono); font-size: 13.5px; line-height: 1.65;
+    background: var(--sheet); border-radius: 14px; box-shadow: 0 0 0 1px var(--rule);
+    padding: 22px 24px; margin: 0; overflow-x: auto;
+  }
+  .copy {
+    position: absolute; top: 12px; right: 12px;
+    font-family: var(--sans); font-size: 14px; font-weight: 600;
+    background: var(--paper); color: var(--ink); border: 1px solid var(--rule); border-radius: 8px;
+    padding: 6px 14px; cursor: pointer;
+  }
+  .copy:hover { border-color: var(--ink); }
+
+  footer.wide { font-family: var(--sans); font-size: 14.5px; color: var(--muted); padding-top: 90px; padding-bottom: 56px; }
+
+  @media (max-width: 860px) {
+    .probe { grid-template-columns: 1fr; }
+    .probe-left { border-right: 0; border-bottom: 1px solid var(--rule); }
+    .losses { grid-template-columns: 1fr; }
+    .loss, .loss + .loss { padding: 20px 0 4px; border-left: 0; }
+    .loss + .loss { border-top: 1px solid var(--rule); }
+    .facts { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 560px) {
+    body { font-size: 17px; }
+    .wide { padding: 0 16px; }
+    header.wide { padding-top: 44px; }
+    .probe-left, .probe-right { padding: 22px 18px; }
+    .scene img { width: 110px; height: 110px; }
+    .switch button, .switch button img { width: 46px; height: 46px; }
+    .row, .axis { grid-template-columns: 72px 1fr 62px; gap: 8px; }
+    .val { font-size: 12.5px; }
+    .row .name { font-size: 13.5px; }
+    .plate { padding: 10px; border-radius: 12px; }
+    .drow, .ticks { grid-template-columns: 1fr 56px; }
+    .drow .lab { grid-column: 1 / -1; }
+    .ticks > span { display: none; }
+    .lede { font-size: 19px; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .bar, .val, .switch button, .cap { transition: none; }
+  }
+</style>
+</head>
+<body>
+
+<header class="wide">
+  <p class="venue"><strong>NeurIPS 2026</strong> &nbsp;poster</p>
+  <h1>Beyond Hard Negatives</h1>
+  <p class="sub">Grounded positive supervision for compositional CLIP</p>
+
+  <div class="authors">
+    <span>Harsh Udai<sup>1</sup></span>
+    <span>Konda Reddy Mopuri<sup>1</sup></span>
+    <span>Vineeth N. Balasubramanian<sup>2,3</sup></span>
+  </div>
+  <div class="affil">
+    <span><sup>1</sup> Dept. of Artificial Intelligence, IIT Hyderabad</span>
+    <span><sup>2</sup> Dept. of CSE, IIT Hyderabad</span>
+    <span><sup>3</sup> Microsoft Research India</span>
+  </div>
+
+  <nav class="links" aria-label="Paper links">
+    <!-- TODO: when the paper / arXiv links exist, set href and remove class "pending" and aria-disabled -->
+    <a class="link pending" href="#" aria-disabled="true">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M14 3H6a1 1 0 0 0-1 1v16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8z"/><path d="M14 3v5h5M9 13h6M9 17h6"/></svg>
+      Paper (soon)
+    </a>
+    <a class="link pending" href="#" aria-disabled="true">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 4l14 16M19 4L5 20"/></svg>
+      arXiv (soon)
+    </a>
+    <a class="link" href="https://github.com/Harsh-Udai/GPS-CLIP">
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 .5C5.65.5.5 5.65.5 12a11.5 11.5 0 0 0 7.86 10.92c.58.1.79-.25.79-.56v-2c-3.2.7-3.87-1.37-3.87-1.37-.53-1.33-1.28-1.69-1.28-1.69-1.05-.71.08-.7.08-.7 1.16.08 1.77 1.19 1.77 1.19 1.03 1.77 2.7 1.26 3.36.96.1-.75.4-1.26.73-1.55-2.55-.29-5.24-1.28-5.24-5.69 0-1.26.45-2.29 1.19-3.1-.12-.29-.52-1.46.11-3.05 0 0 .97-.31 3.17 1.18a11 11 0 0 1 5.77 0c2.2-1.49 3.17-1.18 3.17-1.18.63 1.59.23 2.76.11 3.05.74.81 1.19 1.84 1.19 3.1 0 4.42-2.7 5.39-5.26 5.68.41.36.78 1.06.78 2.14v3.17c0 .31.21.67.8.56A11.5 11.5 0 0 0 23.5 12C23.5 5.65 18.35.5 12 .5z"/></svg>
+      Code
+    </a>
+    <a class="link quiet" href="#bibtex">Cite</a>
+  </nav>
+
+  <!-- Signature element: the paper's Fig. 1 as a hands-on probe -->
+  <div class="probe" id="probe">
+    <div class="probe-left">
+      <h2>Same words, different scene</h2>
+      <p class="hint">Both captions use the same objects. Only who-is-where changes. Pick the one that matches the photo.</p>
+
+      <div class="scene">
+        <img id="sceneImg" src="static/images/example-livingroom.png" alt="">
+        <div class="switch" role="group" aria-label="Choose an example">
+          <button type="button" data-ex="0" aria-pressed="true" aria-label="Living room example"><img src="static/images/example-livingroom.png" alt=""></button>
+          <button type="button" data-ex="1" aria-pressed="false" aria-label="Classroom example"><img src="static/images/example-classroom.png" alt=""></button>
+        </div>
+      </div>
+
+      <div class="captions">
+        <button type="button" class="cap" data-c="A"><span class="key">A</span><span class="txt"></span></button>
+        <button type="button" class="cap" data-c="B"><span class="key">B</span><span class="txt"></span></button>
+      </div>
+      <div class="verdict" id="verdict" aria-live="polite"></div>
+    </div>
+
+    <div class="probe-right">
+      <h2>What the models prefer</h2>
+      <p class="hint">Cosine margin between the correct and the wrong caption. Right of the line means the model chose correctly.</p>
+      <div class="bars" id="bars"></div>
+      <div class="axis" aria-hidden="true"><span></span><div><span>prefers wrong</span><span>prefers correct</span></div><span></span></div>
+      <p class="probe-note">Examples and margins from Fig. 1 of the paper (ViT-B/32).</p>
+    </div>
+  </div>
+</header>
+
+<main class="wide">
+
+  <section>
+    <div class="read">
+      <h2>The idea</h2>
+      <p class="lede">CLIP knows <em>what</em> is in an image but often not <em>how it fits together</em>. Most fixes train it to reject edited "hard negative" captions. GPS-CLIP does the opposite: it pulls the image toward its own grounded structure, its regions, their descriptions, and the relations between them.</p>
+      <p>Scene graphs are used only while fine-tuning. The model you deploy is a plain CLIP dual encoder with the same architecture, the same inputs, and no extra inference cost.</p>
+    </div>
+  </section>
+
+  <section>
+    <div class="read"><h2>Three losses, one embedding space</h2>
+      <p>An image and its caption are decomposed into regions and a scene graph. Three complementary objectives then act on the same image and text encoders.</p>
+    </div>
+    <figure>
+      <div class="plate"><a href="static/images/method.png" aria-label="Open full-size method figure"><img src="static/images/method.png" alt="GPS-CLIP overview: image and text encoders trained with global, region, and triplet losses from a scene graph"></a></div>
+      <figcaption><b>Structured contrastive training at a glance.</b> Region and sub-region crops, their descriptions, and ⟨subject, relation, object⟩ triplets are aligned in the shared embedding space alongside the usual image–caption pairs.</figcaption>
+    </figure>
+
+    <div class="losses">
+      <div class="loss">
+        <h3><i style="background:var(--c-caption)"></i>Global</h3>
+        <p>The standard image–caption contrastive loss, <span class="eq">ℒ</span><sub>global</sub>. Kept as is, so zero-shot ability is preserved.</p>
+      </div>
+      <div class="loss">
+        <h3><i style="background:var(--c-sub)"></i>Region</h3>
+        <p>Image sub-regions are matched to their text spans, <span class="eq">ℒ</span><sub>region</sub>. Overlapping regions count as weighted positives instead of being pushed apart.</p>
+      </div>
+      <div class="loss">
+        <h3><i style="background:var(--c-triplet)"></i>Relation</h3>
+        <p>Each image is aligned with its ⟨s, r, o⟩ triplets, <span class="eq">ℒ</span><sub>relation</sub>. Order matters: "dog chasing frisbee" is not "frisbee chasing dog".</p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="read">
+      <h2>Overlap is not a mistake</h2>
+      <p>Regions cut from the same image often overlap. A standard contrastive loss would treat every other region as a negative, punishing the model for noticing that two boxes show the same thing. GPS-CLIP decides by overlap instead.</p>
+    </div>
+    <figure>
+      <div class="plate"><a href="static/images/region-loss.png" aria-label="Open full-size region loss figure"><img src="static/images/region-loss.png" alt="Similarity grid between image sub-regions and sub-region descriptions, marked positive, masked, or negative"></a></div>
+      <figcaption><b>IoU-weighted region–phrase loss.</b> In the ablations, masking same-image pairs adds +1.46 points on average and IoU weighting a further +2.74. Simply adding scene-graph data to a standard loss gains only +0.27.</figcaption>
+    </figure>
+  </section>
+
+  <section>
+    <div class="read">
+      <h2>Results</h2>
+      <p>Fine-tuned from CLIP ViT-B/32, GPS-CLIP improves every benchmark we report, including zero-shot ImageNet and retrieval, which hard-negative methods often trade away.</p>
+    </div>
+
+    <div class="dots" id="dots">
+      <div class="dots-legend" aria-hidden="true">
+        <span><i class="dot-key" style="background:var(--base)"></i>CLIP</span>
+        <span><i class="dot-key" style="background:var(--pos)"></i>GPS-CLIP</span>
+      </div>
+      <div id="dotRows"></div>
+      <div class="ticks" aria-hidden="true"><span></span><div><span>0</span><span>25</span><span>50</span><span>75</span><span>100</span></div><span></span></div>
+    </div>
+    <p class="small-note">Accuracy or Recall@1 (%), from Table 1. Comparisons with NegCLIP, TripletCLIP, DAC, CLoVe, CE-CLIP, FSC-CLIP and CLIC are in the paper.</p>
+  </section>
+
+  <section>
+    <div class="read"><h2>Why it's practical</h2></div>
+    <ul class="facts">
+      <li><b>Nothing new at inference</b>Same dual encoder, no added parameters, latency or FLOPs.</li>
+      <li><b>Training-time structure only</b>Scene graphs come from an offline multimodal model and are dropped after fine-tuning.</li>
+      <li><b>Tolerates noisy graphs</b>Performance degrades gracefully when region spans and triplets are corrupted.</li>
+      <li><b>Loss- and scale-agnostic</b>Works with InfoNCE and SigLIP-style sigmoid losses, and scales to ViT-L/14.</li>
+    </ul>
+  </section>
+
+  <section id="bibtex">
+    <div class="read"><h2>Cite</h2></div>
+    <div class="bib">
+      <button class="copy" id="copyBtn" type="button">Copy</button>
+<pre id="bib">@inproceedings{udai2026gpsclip,
+  title     = {Beyond Hard Negatives: Grounded Positive Supervision for Compositional {CLIP}},
+  author    = {Udai, Harsh and Mopuri, Konda Reddy and Balasubramanian, Vineeth N.},
+  booktitle = {Advances in Neural Information Processing Systems (NeurIPS)},
+  year      = {2026}
+}</pre>
+    </div>
+  </section>
+
+</main>
+
+<footer class="wide">
+  GPS-CLIP · <a href="https://github.com/Harsh-Udai/GPS-CLIP">github.com/Harsh-Udai/GPS-CLIP</a>
+</footer>
+
+<script>
+(function () {
+  /* Examples, captions and margins are taken from Fig. 1 of the paper. */
+  var EX = [
+    {
+      img: "static/images/example-livingroom.png",
+      alt: "A living room with an art book, a TV remote and coasters on a coffee table",
+      A: "A thick art book lies to the far left of the coffee table, with the TV remote placed beside it and a stack of coasters set in the center.",
+      B: "The TV remote lies to the far left of the coffee table, placed beside a stack of coasters, with a thick art book set in the center.",
+      correct: "A",
+      m: [["TripletCLIP", -0.0115], ["NegCLIP", -0.0076], ["CLIP", -0.0027], ["GPS-CLIP", 0.0064]]
+    },
+    {
+      img: "static/images/example-classroom.png",
+      alt: "A classroom with students standing at the front near a teacher",
+      A: "The students are standing on top of the desks, with the teacher seated at the front of the classroom.",
+      B: "The students are standing at the front of the classroom, with the teacher seated behind the desks.",
+      correct: "B",
+      m: [["TripletCLIP", -0.0075], ["NegCLIP", 0.0006], ["CLIP", -0.0014], ["GPS-CLIP", 0.0017]]
+    }
+  ];
+
+  var cur = 0;
+  var img = document.getElementById("sceneImg");
+  var caps = document.querySelectorAll(".cap");
+  var bars = document.getElementById("bars");
+  var verdict = document.getElementById("verdict");
+  var switches = document.querySelectorAll(".switch button");
+
+  function fmt(v) { return (v > 0 ? "+" : "") + v.toFixed(4); }
+
+  function drawBars(reveal) {
+    var ex = EX[cur];
+    var max = Math.max.apply(null, ex.m.map(function (r) { return Math.abs(r[1]); })) * 1.15;
+    bars.innerHTML = "";
+    bars.classList.remove("revealed");
+    ex.m.forEach(function (r) {
+      var row = document.createElement("div");
+      row.className = "row" + (r[0] === "GPS-CLIP" ? " ours" : "");
+      var pct = Math.abs(r[1]) / max * 50;
+      var pos = r[1] > 0;
+      row.innerHTML =
+        '<div class="name">' + r[0] + '</div>' +
+        '<div class="track"><div class="bar ' + (pos ? "p" : "n") + '" data-w="' + pct + '"' +
+        (pos ? '' : ' style="left:50%"') + '></div></div>' +
+        '<span class="val" style="color:var(' + (pos ? "--pos" : "--neg") + ')">' +
+        fmt(r[1]) + (pos ? " ✓" : " ✗") + '</span>';
+      bars.appendChild(row);
+    });
+    if (reveal) requestAnimationFrame(function () { requestAnimationFrame(grow); });
+  }
+
+  function grow() {
+    bars.classList.add("revealed");
+    bars.querySelectorAll(".bar").forEach(function (b) {
+      var w = b.getAttribute("data-w");
+      b.style.width = w + "%";
+      if (b.classList.contains("n")) b.style.left = (50 - w) + "%";
+    });
+  }
+
+  function load(i) {
+    cur = i;
+    var ex = EX[i];
+    img.src = ex.img; img.alt = ex.alt;
+    switches.forEach(function (s, k) { s.setAttribute("aria-pressed", k === i ? "true" : "false"); });
+    caps.forEach(function (c) {
+      c.disabled = false; c.classList.remove("right", "wrong");
+      c.querySelector(".txt").textContent = ex[c.getAttribute("data-c")];
+    });
+    verdict.textContent = "";
+    drawBars(false);
+    var hint = document.createElement("p");
+    hint.className = "bars-empty";
+    hint.textContent = "Pick a caption to see how each model scores it.";
+    bars.appendChild(hint);
+  }
+
+  caps.forEach(function (c) {
+    c.addEventListener("click", function () {
+      var ex = EX[cur], pick = c.getAttribute("data-c");
+      caps.forEach(function (o) {
+        o.disabled = true;
+        o.classList.add(o.getAttribute("data-c") === ex.correct ? "right" : "wrong");
+      });
+      verdict.textContent = pick === ex.correct
+        ? "Correct. You read the layout, not just the objects."
+        : "Not this one. Caption " + ex.correct + " matches the photo.";
+      drawBars(true);
+    });
+  });
+  switches.forEach(function (s) {
+    s.addEventListener("click", function () { load(+s.getAttribute("data-ex")); });
+  });
+  load(0);
+
+  /* Results dot plot, values from Table 1 (CLIP ViT-B/32 vs GPS-CLIP). */
+  var R = [
+    ["COLA", "multi-object binding", 22.86, 30.64],
+    ["What'sUp", "spatial relations", 41.77, 47.38],
+    ["Winoground", "group score", 16.40, 18.35],
+    ["SugarCrepe", "add", 72.68, 94.78],
+    ["SugarCrepe", "replace", 80.02, 84.00],
+    ["SugarCrepe", "swap", 62.60, 70.75],
+    ["SugarCrepe++", "replace", 68.68, 76.17],
+    ["SugarCrepe++", "swap", 43.07, 49.79],
+    ["MMVP-VLM", "fine-grained perception", 27.42, 33.33],
+    ["ImageNetV2", "zero-shot top-1", 55.96, 58.11],
+    ["Retrieval", "COCO + Flickr30k, R@1", 54.67, 62.92]
+  ];
+  var host = document.getElementById("dotRows");
+  R.forEach(function (r) {
+    var d = document.createElement("div");
+    d.className = "drow";
+    d.setAttribute("role", "group");
+    d.setAttribute("aria-label", r[0] + " " + r[1] + ": CLIP " + r[2] + ", GPS-CLIP " + r[3]);
+    d.innerHTML =
+      '<div class="lab">' + r[0] + '<small>' + r[1] + '</small></div>' +
+      '<div class="line" aria-hidden="true">' +
+        '<span class="seg" style="left:' + r[2] + '%;width:' + (r[3] - r[2]) + '%"></span>' +
+        '<span class="dot b" style="left:' + r[2] + '%" title="CLIP ' + r[2].toFixed(2) + '"></span>' +
+        '<span class="dot g" style="left:' + r[3] + '%" title="GPS-CLIP ' + r[3].toFixed(2) + '"></span>' +
+      '</div>' +
+      '<div class="delta">+' + (r[3] - r[2]).toFixed(2) + '</div>';
+    host.appendChild(d);
+  });
+
+  /* Copy BibTeX */
+  document.getElementById("copyBtn").addEventListener("click", function () {
+    var btn = this, text = document.getElementById("bib").innerText;
+    function done() { btn.textContent = "Copied"; setTimeout(function () { btn.textContent = "Copy"; }, 1500); }
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(done, function () {});
+    } else {
+      var ta = document.createElement("textarea"); ta.value = text; document.body.appendChild(ta); ta.select();
+      try { document.execCommand("copy"); done(); } catch (e) {}
+      document.body.removeChild(ta);
+    }
+  });
+})();
+</script>
+</body>
+</html>
