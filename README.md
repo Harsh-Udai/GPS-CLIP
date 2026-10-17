@@ -1,6 +1,6 @@
 <div align="center">
 
-# 🧭 GPS-CLIP
+# GPS-CLIP
 
 ### Beyond Hard Negatives: Grounded Positive Supervision for Compositional CLIP
 
