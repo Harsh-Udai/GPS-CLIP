@@ -1,48 +1,65 @@
-# GPS-CLIP: Beyond Hard Negatives — Grounded Positive Supervision for Compositional CLIP
+<div align="center">
 
-**NeurIPS 2026**
+# 🧭 GPS-CLIP
 
-**Harsh Udai**<sup>1</sup>, **Konda Reddy Mopuri**<sup>1</sup>, **Vineeth N. Balasubramanian**<sup>2,3</sup>
+### Beyond Hard Negatives: Grounded Positive Supervision for Compositional CLIP
 
-<sup>1</sup>Department of Artificial Intelligence, IIT Hyderabad &nbsp;·&nbsp;
-<sup>2</sup>Department of Computer Science and Engineering, IIT Hyderabad &nbsp;·&nbsp;
+**Harsh Udai**<sup>1</sup> &nbsp;·&nbsp; **Konda Reddy Mopuri**<sup>1</sup> &nbsp;·&nbsp; **Vineeth N. Balasubramanian**<sup>2,3</sup>
+
+<sup>1</sup>Dept. of Artificial Intelligence, IIT Hyderabad &nbsp;&nbsp;
+<sup>2</sup>Dept. of CSE, IIT Hyderabad &nbsp;&nbsp;
 <sup>3</sup>Microsoft Research India
 
-[[Paper]](TODO-link-to-paper) &nbsp; [[arXiv]](TODO-arxiv-link)
+<br>
+
+[![NeurIPS 2026](https://img.shields.io/badge/NeurIPS-2026-6f42c1?style=for-the-badge)](TODO-link-to-paper)
+[![Paper](https://img.shields.io/badge/Paper-PDF-b31b1b?style=for-the-badge&logo=adobeacrobatreader&logoColor=white)](TODO-link-to-paper)
+[![arXiv](https://img.shields.io/badge/arXiv-coming%20soon-lightgrey?style=for-the-badge&logo=arxiv&logoColor=white)](TODO-arxiv-link)
+[![License: MIT](https://img.shields.io/badge/License-MIT-2ea44f?style=for-the-badge)](LICENSE)
+[![Code](https://img.shields.io/badge/Code-coming%20soon-orange?style=for-the-badge&logo=github)](#-release-plan)
+
+</div>
+
+<!-- Optional: add your teaser figure (e.g., Fig. 1 or Fig. 2 from the paper) -->
+<!-- <p align="center"><img src="assets/teaser.png" width="90%"></p> -->
 
 ---
 
-> 🚧 **Code coming soon.** We are cleaning up the training and evaluation code and will release it here before the conference.
+> [!NOTE]
+> 🚧 **Code is coming soon.** We are cleaning up the training and evaluation pipeline and will release it here before the conference. Star ⭐ or watch 👀 the repo to get notified.
 
-## Overview
+## ✨ TL;DR
 
-CLIP-style vision-language models transfer broadly but remain brittle for compositional reasoning, often collapsing object–attribute binding and inter-object relations. Many existing fixes rely on caption-edited hard negatives, which can bias learning toward specific perturbation templates and trade off against general alignment.
+CLIP models are good at *what* is in an image but often miss *how things relate*: who is chasing whom, which object is red, what is on top of what. Instead of teaching CLIP to reject synthetic "hard negative" captions, **GPS-CLIP pulls each image toward its own grounded structure**: its regions, their descriptions, and the relations between them.
 
-**GPS-CLIP** improves compositionality by adding multi-granular **positive** constraints to standard contrastive learning:
+The result is better compositional reasoning, **better** zero-shot recognition and retrieval, and **zero extra cost at inference**.
 
-- **IoU-weighted multi-positive region–span alignment** — overlapping same-image regions are treated as weighted positives, non-overlapping same-image pairs are masked, and cross-image pairs remain negatives.
-- **Relation-triplet alignment** — a relation-aware contrastive loss over ⟨subject, relation, object⟩ triplets that provides an ordered relational inductive bias.
+## 🔍 Method at a Glance
 
-Structured annotations are used **only during fine-tuning**. At inference, GPS-CLIP is a standard CLIP dual encoder that needs only images and text, with no extra latency, parameters, or FLOPs.
+GPS-CLIP adds two structured **positive** objectives on top of the standard CLIP contrastive loss:
 
-## Highlights
+- 🟩 **IoU-weighted multi-positive region loss** aligns image regions with their text spans. Overlapping same-image regions are treated as *weighted positives*, non-overlapping same-image pairs are *masked*, and cross-image pairs stay *negatives*.
+- 🔗 **Relation-triplet loss** aligns each image with its ⟨subject, relation, object⟩ triplets, giving the model an *ordered* relational inductive bias (e.g., "dog chasing frisbee" ≠ "frisbee chasing dog").
+- 🌐 **Global CLIP loss** keeps the standard image–caption contrastive alignment, preserving general zero-shot ability.
 
-- State-of-the-art average accuracy on COLA, What'sUp, and Winoground, and strong results on SugarCrepe / SugarCrepe++
-- Best MMVP-VLM results for fine-grained visual understanding
-- Improves zero-shot ImageNetV2 classification and COCO / Flickr30k retrieval
-- Robust to moderately noisy scene-graph supervision, scales to ViT-L/14, and works with a SigLIP-style sigmoid loss
+**Why it's practical:**
 
-## Planned release
+- ✅ Same dual-encoder architecture
+- ✅ Scene graphs used only during training
+- ✅ No extra latency, parameters, or FLOPs at inference
+- ✅ Works with InfoNCE *and* SigLIP-style sigmoid loss
+
+## 🗺️ Release Plan
 
 - [ ] Training code (OpenCLIP + LoRA)
 - [ ] Region–span and relation-triplet loss implementations
-- [ ] Triplet extraction pipeline (Qwen2.5-7B-Instruct prompt)
-- [ ] Evaluation scripts (COLA, What'sUp, Winoground, SugarCrepe/++, MMVP-VLM, retrieval, ImageNetV2)
-- [ ] Pretrained checkpoints
+- [ ] Triplet extraction pipeline (Qwen2.5-7B-Instruct)
+- [ ] Evaluation scripts: COLA, What'sUp, Winoground, SugarCrepe/++, MMVP-VLM, retrieval, ImageNetV2
+- [ ] Pretrained checkpoints (ViT-B/32, ViT-L/14)
 
-## Citation
+## 📝 Citation
 
-If you find this work useful, please cite:
+If you find this work useful, please consider citing:
 
 ```bibtex
 @inproceedings{udai2026gpsclip,
@@ -53,10 +70,10 @@ If you find this work useful, please cite:
 }
 ```
 
-## License
+## 🙏 Acknowledgments
 
-This project is released under the MIT License (see [LICENSE](LICENSE)). Datasets, pretrained models, and benchmarks used in this work are governed by their original licenses.
+This codebase builds on [OpenCLIP](https://github.com/mlfoundations/open_clip) and uses [Graph-Based Captioning (GBC)](https://arxiv.org/abs/2407.06723) supervision. We thank the authors for making their work publicly available.
 
-## Acknowledgments
+## 📄 License
 
-This codebase builds on [OpenCLIP](https://github.com/mlfoundations/open_clip) and uses Graph-Based Captions (GBC) supervision.
+Released under the [MIT License](LICENSE). Datasets, pretrained models, and benchmarks used in this work remain governed by their original licenses.
