@@ -1,0 +1,36 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+build/
+dist/
+.venv/
+venv/
+env/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Experiment outputs
+logs/
+runs/
+wandb/
+outputs/
+checkpoints/
+*.pt
+*.pth
+*.ckpt
+*.safetensors
+
+# Data (do not commit datasets)
+data/
+datasets/
+*.tar
+*.zip
+*.parquet
+
+# Editors / OS
+.vscode/
+.idea/
+.DS_Store
