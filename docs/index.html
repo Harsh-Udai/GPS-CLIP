@@ -651,11 +651,7 @@
       <p>GPS-CLIP loads like any CLIP checkpoint. Swap it into existing code without other changes.</p>
     </div>
     <!-- TODO: replace the checkpoint path / Hugging Face id in the script once released -->
-    <div class="ctabs" role="tablist" aria-label="Library">
-      <button role="tab" type="button" aria-selected="true" data-c="oc">open_clip</button>
-      <button role="tab" type="button" aria-selected="false" data-c="hf">transformers</button>
-    </div>
-    <div class="code"><button class="copy" type="button" id="codeCopy">Copy</button><pre id="codeBox"></pre></div>
+    <div class="code" style="margin-top:22px"><button class="copy" type="button" id="codeCopy">Copy</button><pre id="codeBox"></pre></div>
   </section>
 
   <section id="bibtex">
@@ -837,13 +833,10 @@
 
   /* Usage snippets (TODO: real checkpoint names) */
   var CODE = {
-    oc: '<span class="k">import</span> torch, open_clip\n<span class="k">from</span> PIL <span class="k">import</span> Image\n\n<span class="c"># TODO: replace with the released checkpoint</span>\nmodel, _, preprocess = open_clip.create_model_and_transforms(\n    "ViT-B-32", pretrained="path/to/gps-clip-vitb32.pt")\ntokenizer = open_clip.get_tokenizer("ViT-B-32")\n\nimage = preprocess(Image.open("scene.jpg")).unsqueeze(0)\ntext = tokenizer(["a dog chasing a frisbee", "a frisbee chasing a dog"])\n\n<span class="k">with</span> torch.no_grad():\n    img = model.encode_image(image)\n    txt = model.encode_text(text)\n    img /= img.norm(dim=-1, keepdim=True)\n    txt /= txt.norm(dim=-1, keepdim=True)\n    print((100 * img @ txt.T).softmax(dim=-1))',
-    hf: '<span class="k">import</span> torch\n<span class="k">from</span> PIL <span class="k">import</span> Image\n<span class="k">from</span> transformers <span class="k">import</span> CLIPModel, CLIPProcessor\n\n<span class="c"># TODO: replace with the released Hugging Face repo id</span>\nmodel = CLIPModel.from_pretrained("your-hf-id/GPS-CLIP-ViT-B-32")\nprocessor = CLIPProcessor.from_pretrained("openai/clip-vit-base-patch32")\n\ninputs = processor(text=["a dog chasing a frisbee", "a frisbee chasing a dog"],\n                   images=Image.open("scene.jpg"), return_tensors="pt", padding=True)\n<span class="k">with</span> torch.no_grad():\n    print(model(**inputs).logits_per_image.softmax(dim=-1))'
+    oc: '<span class="k">import</span> torch, open_clip\n<span class="k">from</span> PIL <span class="k">import</span> Image\n\nmodel, _, preprocess = open_clip.create_model_and_transforms(\n    "ViT-B-32", pretrained="path/to/gps-clip-vitb32.pt")\ntokenizer = open_clip.get_tokenizer("ViT-B-32")\n\nimage = preprocess(Image.open("scene.jpg")).unsqueeze(0)\ntext = tokenizer(["a dog chasing a frisbee", "a frisbee chasing a dog"])\n\n<span class="k">with</span> torch.no_grad():\n    img = model.encode_image(image)\n    txt = model.encode_text(text)\n    img /= img.norm(dim=-1, keepdim=True)\n    txt /= txt.norm(dim=-1, keepdim=True)\n    print((100 * img @ txt.T).softmax(dim=-1))'
   };
-  var codeBox = document.getElementById("codeBox"), ctabs = document.querySelectorAll(".ctabs button");
-  function showCode(k) { ctabs.forEach(function (b) { b.setAttribute("aria-selected", b.getAttribute("data-c") === k ? "true" : "false"); }); codeBox.innerHTML = CODE[k]; }
-  ctabs.forEach(function (b) { b.addEventListener("click", function () { showCode(b.getAttribute("data-c")); }); });
-  showCode("oc");
+  var codeBox = document.getElementById("codeBox");
+  codeBox.innerHTML = CODE.oc;
 
   /* Copy buttons (code + BibTeX) */
   function copyFrom(btn, el) {
