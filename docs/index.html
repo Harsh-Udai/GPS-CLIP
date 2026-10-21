@@ -11,7 +11,7 @@
 <meta name="twitter:card" content="summary_large_image">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,700&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&family=IBM+Plex+Mono:wght@400&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,700;12..96,800&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&family=IBM+Plex+Mono:wght@400&display=swap" rel="stylesheet">
 <style>
   :root {
     --paper: #f5f7f9;
@@ -74,50 +74,65 @@
   .read { max-width: 680px; }
 
   /* ---------- header ---------- */
-  header.wide { padding-top: 72px; padding-bottom: 36px; }
-  .venue { font-family: var(--sans); font-size: 15px; color: var(--muted); margin: 0 0 18px; }
-  .venue strong { color: var(--ink); font-weight: 600; }
-  h1 {
-    font-family: var(--sans);
-    font-weight: 700;
-    font-size: clamp(38px, 6.4vw, 76px);
-    line-height: 1.02;
-    letter-spacing: -0.03em;
-    margin: 0;
-    max-width: 15ch;
+  header.wide { padding-top: 64px; padding-bottom: 36px; text-align: center; }
+  .venue {
+    display: inline-block; font-family: var(--sans); font-size: 13px; font-weight: 600;
+    letter-spacing: .08em; text-transform: uppercase;
+    padding: 5px 12px; border-radius: 999px; background: var(--pos-tint); color: var(--pos); margin: 0;
   }
-  .sub {
-    font-family: var(--sans);
-    font-weight: 400;
-    font-size: clamp(20px, 2.6vw, 28px);
-    line-height: 1.3;
-    letter-spacing: -0.01em;
-    color: var(--muted);
-    margin: 14px 0 34px;
-    max-width: 30ch;
+  .mark {
+    font-family: var(--sans); font-weight: 800;
+    font-size: clamp(58px, 11vw, 128px); line-height: .9; letter-spacing: -0.055em;
+    margin: 22px 0 0;
   }
-  .authors { font-family: var(--sans); font-size: 18px; display: flex; flex-wrap: wrap; gap: 4px 26px; }
-  .authors sup { color: var(--muted); font-size: 0.65em; margin-left: 1px; }
-  .affil { font-family: var(--sans); font-size: 14.5px; color: var(--muted); margin-top: 8px; display: flex; flex-wrap: wrap; gap: 2px 22px; }
+  .mark .dash { color: var(--pos); }
+  .expand { display: flex; justify-content: center; flex-wrap: wrap; gap: 8px; margin: 16px 0 0; font-family: var(--sans); font-size: 15px; }
+  .expand span { padding: 4px 12px 5px; border-radius: 8px; }
+  .expand b { font-weight: 700; }
+  h1.title {
+    font-family: var(--serif); font-weight: 400;
+    font-size: clamp(20px, 2.5vw, 27px); line-height: 1.35; letter-spacing: 0;
+    margin: 24px auto 0; max-width: 32ch; text-wrap: balance;
+  }
+  h1.title i { color: var(--muted); }
+  .authors { font-family: var(--sans); font-size: 18px; display: flex; justify-content: center; flex-wrap: wrap; gap: 4px 26px; margin-top: 26px; }
+  .authors sup, .affil sup { color: var(--muted); font-size: 0.65em; margin-left: 1px; }
+  .affil { font-family: var(--sans); font-size: 14.5px; color: var(--muted); margin-top: 6px; display: flex; justify-content: center; flex-wrap: wrap; gap: 2px 22px; }
 
-  .links { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 30px; }
+  .links { display: flex; justify-content: center; flex-wrap: wrap; gap: 10px; margin-top: 26px; }
   .link {
-    font-family: var(--sans); font-size: 15.5px; font-weight: 600;
+    font-family: var(--sans); font-size: 15px; font-weight: 600;
     display: inline-flex; align-items: center; gap: 8px;
-    padding: 10px 18px 10px 16px; border-radius: 10px;
-    text-decoration: none;
+    padding: 9px 17px 9px 14px; border-radius: 999px;
+    text-decoration: none; white-space: nowrap;
     background: var(--ink); color: var(--paper);
   }
   .link:hover { color: var(--paper); background: var(--pos); }
-  .link svg { width: 18px; height: 18px; flex: none; }
+  .link svg { width: 17px; height: 17px; flex: none; }
   .link.pending { background: transparent; color: var(--muted); box-shadow: inset 0 0 0 1px var(--rule); cursor: default; }
   .link.pending:hover { background: transparent; color: var(--muted); }
   .link.quiet { background: transparent; color: var(--ink); box-shadow: inset 0 0 0 1px var(--ink); }
   .link.quiet:hover { background: var(--ink); color: var(--paper); }
 
+  /* TL;DR + headline numbers */
+  .tldr {
+    margin: 36px auto 0; text-align: left;
+    display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.3fr);
+    background: var(--sheet); border-radius: 16px; box-shadow: 0 0 0 1px var(--rule);
+  }
+  .tldr-text { padding: 22px 24px; border-right: 1px solid var(--rule); font-size: 16.5px; line-height: 1.55; }
+  .tldr .tag { font-family: var(--mono); font-size: 12px; letter-spacing: .06em; color: var(--pos); display: block; margin-bottom: 6px; }
+  .stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); font-family: var(--sans); }
+  .stat { padding: 20px 16px; }
+  .stat + .stat { border-left: 1px solid var(--rule); }
+  .stat b { display: block; font-size: 28px; font-weight: 700; color: var(--pos); letter-spacing: -0.02em; font-variant-numeric: tabular-nums; line-height: 1.1; }
+  .stat span { display: block; font-size: 14px; font-weight: 600; margin-top: 4px; line-height: 1.35; }
+  .stat small { display: block; font-family: var(--mono); font-size: 11.5px; color: var(--muted); margin-top: 2px; font-variant-numeric: tabular-nums; }
+  .probe { text-align: left; }
+
   /* ---------- the probe (signature element) ---------- */
   .probe {
-    margin-top: 44px;
+    margin-top: 22px;
     background: var(--sheet);
     border-radius: 18px;
     box-shadow: 0 0 0 1px var(--rule);
@@ -263,6 +278,8 @@
     .loss, .loss + .loss { padding: 20px 0 4px; border-left: 0; }
     .loss + .loss { border-top: 1px solid var(--rule); }
     .facts { grid-template-columns: 1fr; }
+    .tldr { grid-template-columns: 1fr; }
+    .tldr-text { border-right: 0; border-bottom: 1px solid var(--rule); }
   }
   @media (max-width: 560px) {
     body { font-size: 17px; }
@@ -279,18 +296,145 @@
     .drow .lab { grid-column: 1 / -1; }
     .ticks > span { display: none; }
     .lede { font-size: 19px; }
+    .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .stat:nth-child(3) { border-left: 0; }
+    .stat:nth-child(n+3) { border-top: 1px solid var(--rule); }
+    .link { font-size: 14px; padding: 8px 14px 8px 12px; }
   }
   @media (prefers-reduced-motion: reduce) {
     .bar, .val, .switch button, .cap { transition: none; }
   }
+
+  /* ---------- 1 · idea: hard negatives vs grounded positives ---------- */
+  .versus { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); border-radius: 14px; overflow: hidden; box-shadow: 0 0 0 1px var(--rule); margin-top: 30px; background: var(--sheet); }
+  .vs-col { padding: 22px 24px; min-width: 0; }
+  .vs-col + .vs-col { border-left: 1px solid var(--rule); }
+  .vs-col .k { font-family: var(--mono); font-size: 12px; letter-spacing: .06em; text-transform: uppercase; }
+  .vs-col.old .k { color: var(--neg); }
+  .vs-col.new .k { color: var(--pos); }
+  .vs-col h3 { font-family: var(--sans); font-size: 20px; font-weight: 600; margin: 4px 0 10px; line-height: 1.25; }
+  .vs-col ul { margin: 0; padding-left: 18px; font-size: 16px; color: var(--muted); }
+  .vs-col li { margin: 3px 0; }
+  .vs-svg { width: 100%; height: auto; display: block; margin: 6px 0 14px; }
+  .vs-svg text { font-family: var(--sans); font-size: 12px; fill: var(--ink); }
+  .vs-svg .t-m { fill: var(--muted); font-size: 11px; }
+  .note { font-family: var(--sans); font-size: 14.5px; color: var(--muted); margin-top: 14px; }
+
+  /* ---------- 2 · clickable objective ---------- */
+  .eqn { font-family: var(--serif); font-size: clamp(22px, 3.2vw, 34px); text-align: center; padding: 22px 10px; margin-top: 30px; background: var(--sheet); border-radius: 14px; box-shadow: 0 0 0 1px var(--rule); overflow-x: auto; white-space: nowrap; }
+  .eqn .term { padding: 2px 10px 4px; border-radius: 8px; cursor: pointer; border: 0; font: inherit; color: var(--ink); transition: box-shadow .15s; }
+  .eqn .term:hover, .eqn .term[aria-pressed="true"] { box-shadow: 0 0 0 2px var(--ink); }
+  .eqn sub { font-size: .55em; font-family: var(--sans); }
+  .eqn .lam { color: var(--muted); font-size: .8em; }
+  .eq-explain { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin-top: 12px; }
+  .eq-card { padding: 16px 18px; border-radius: 12px; background: var(--sheet); box-shadow: 0 0 0 1px var(--rule); font-size: 16px; line-height: 1.55; color: var(--muted); transition: opacity .2s; }
+  .eq-card b { font-family: var(--sans); display: flex; gap: 10px; align-items: center; font-size: 18px; font-weight: 600; margin-bottom: 4px; color: var(--ink); }
+  .eq-card b em { width: 13px; height: 13px; border-radius: 4px; flex: none; }
+  .eq-explain.focus .eq-card:not(.on) { opacity: .35; }
+  .eq-hint { font-family: var(--sans); font-size: 14px; color: var(--muted); text-align: center; margin-top: 10px; }
+
+  /* ---------- 3 · overlap: IoU demo + ablation staircase ---------- */
+  .iou { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: 28px; align-items: center; margin-top: 30px; }
+  .iou svg { width: 100%; height: auto; display: block; background: var(--sheet); border-radius: 14px; box-shadow: 0 0 0 1px var(--rule); }
+  .iou .bx-a { fill: color-mix(in srgb, var(--c-region) 70%, transparent); stroke: #4d7fbf; stroke-width: 2; }
+  .iou .bx-b { fill: color-mix(in srgb, var(--c-sub) 70%, transparent); stroke: #c2546a; stroke-width: 2; }
+  .iou .bx-i { fill: var(--pos); opacity: .35; }
+  .iou svg text { font-family: var(--sans); font-size: 13px; fill: var(--ink); }
+  .iou label { font-family: var(--sans); font-size: 15px; color: var(--muted); display: block; margin-bottom: 6px; }
+  .iou input[type=range] { width: 100%; accent-color: var(--pos); }
+  .readout { font-family: var(--sans); margin: 16px 0 0; display: grid; grid-template-columns: auto 1fr; gap: 8px 16px; align-items: baseline; }
+  .readout dt { color: var(--muted); font-size: 14.5px; }
+  .readout dd { margin: 0; font-weight: 700; font-size: 20px; font-variant-numeric: tabular-nums; }
+  .pill { display: inline-block; font-size: 14px; font-weight: 700; padding: 3px 10px; border-radius: 999px; }
+  .pill.neg { background: var(--neg-tint); color: var(--neg); }
+  .pill.pos { background: var(--pos-tint); color: var(--pos); }
+  .pill.mask { background: var(--paper); color: var(--muted); box-shadow: inset 0 0 0 1px var(--rule); }
+
+  .stairs-wrap { margin-top: 44px; }
+  .stairs-wrap h3 { font-family: var(--sans); font-size: 22px; font-weight: 600; letter-spacing: -0.01em; margin: 0 0 4px; }
+  .stairs { font-family: var(--sans); display: grid; gap: 10px; margin-top: 18px; }
+  .st-row { display: grid; grid-template-columns: 220px minmax(0, 1fr) 70px; gap: 14px; align-items: center; }
+  .st-row .lab { font-size: 15.5px; text-align: right; line-height: 1.3; }
+  .st-row .lab small { display: block; color: var(--muted); font-size: 13px; }
+  .st-track { position: relative; height: 26px; background: color-mix(in srgb, var(--rule) 45%, transparent); border-radius: 6px; }
+  .st-bar { position: absolute; top: 0; bottom: 0; border-radius: 6px; }
+  .st-val { font-weight: 700; color: var(--pos); font-variant-numeric: tabular-nums; }
+  .st-total { border-top: 1px solid var(--rule); padding-top: 10px; }
+
+  /* ---------- 4 · results: grouped bars with tabs ---------- */
+  .seg-tabs { display: inline-flex; flex-wrap: wrap; padding: 4px; gap: 4px; background: var(--sheet); border-radius: 10px; box-shadow: 0 0 0 1px var(--rule); font-family: var(--sans); margin: 26px 0 22px; }
+  .seg-tabs button { border: 0; background: none; padding: 7px 14px; border-radius: 7px; cursor: pointer; font: inherit; font-size: 15px; color: var(--muted); }
+  .seg-tabs button[aria-selected="true"] { background: var(--ink); color: var(--paper); font-weight: 600; }
+  .gbars { font-family: var(--sans); display: grid; gap: 16px; }
+  .gb { display: grid; grid-template-columns: 190px minmax(0, 1fr); gap: 16px; align-items: center; }
+  .gb .lab { font-size: 15.5px; text-align: right; line-height: 1.3; }
+  .gb .lab small { display: block; color: var(--muted); font-size: 13px; }
+  .gb .pair { display: grid; gap: 4px; padding-right: 120px; }
+  .gb .b { height: 16px; border-radius: 4px; position: relative; }
+  .gb .b.c { background: var(--base); }
+  .gb .b.g { background: var(--pos); }
+  .gb .b span { position: absolute; left: calc(100% + 8px); top: -2px; font-size: 13px; white-space: nowrap; font-variant-numeric: tabular-nums; color: var(--muted); }
+  .gb .b.g span { color: var(--pos); font-weight: 700; }
+  .legend { display: flex; flex-wrap: wrap; gap: 8px 22px; font-family: var(--sans); font-size: 14.5px; color: var(--muted); margin-top: 18px; }
+  .legend span { display: inline-flex; gap: 8px; align-items: center; }
+  .legend em { width: 12px; height: 12px; border-radius: 3px; }
+
+  /* ---------- 5 · spec sheet ---------- */
+  .spec { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); background: var(--sheet); border-radius: 14px; box-shadow: 0 0 0 1px var(--rule); overflow: hidden; font-family: var(--sans); }
+  .spec > div { padding: 20px 24px; min-width: 0; }
+  .spec > div + div { border-left: 1px solid var(--rule); background: color-mix(in srgb, var(--pos-tint) 45%, var(--sheet)); }
+  .spec h3 { margin: 0 0 12px; font-size: 13px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+  .spec dl { margin: 0; display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 10px 14px; font-size: 16px; }
+  .spec dt { color: var(--muted); }
+  .spec dd { margin: 0; font-weight: 600; text-align: right; }
+  .spec dd.same { color: var(--pos); }
+
+  /* ---------- 6 · usage ---------- */
+  .ctabs { display: flex; gap: 4px; font-family: var(--sans); margin: 22px 0 10px; }
+  .ctabs button { border: 0; background: none; font: inherit; font-size: 15px; padding: 6px 12px; border-radius: 7px; cursor: pointer; color: var(--muted); }
+  .ctabs button[aria-selected="true"] { background: var(--ink); color: var(--paper); font-weight: 600; }
+  .code { position: relative; }
+  .code pre { font-family: var(--mono); font-size: 13.5px; line-height: 1.65; background: var(--sheet); border-radius: 14px; box-shadow: 0 0 0 1px var(--rule); padding: 22px 24px; margin: 0; overflow-x: auto; }
+  .code .c { color: var(--muted); }
+  .code .k { color: var(--pos); }
+
+  /* ---------- footer ---------- */
+  footer.wide { padding-top: 90px; padding-bottom: 56px; }
+  .foot { display: grid; grid-template-columns: minmax(0, 1.2fr) repeat(2, minmax(0, 1fr)); gap: 24px; font-family: var(--sans); font-size: 14.5px; color: var(--muted); border-top: 1px solid var(--rule); padding-top: 26px; }
+  .foot b { color: var(--ink); display: block; margin-bottom: 4px; font-size: 15px; }
+  .foot .wm { font-weight: 800; font-size: 28px; letter-spacing: -0.04em; color: var(--ink); line-height: 1; }
+  .foot .wm span { color: var(--pos); }
+  .foot p { margin: 8px 0 0; }
+
+  @media (max-width: 860px) {
+    .versus, .iou, .spec { grid-template-columns: 1fr; }
+    .vs-col + .vs-col, .spec > div + div { border-left: 0; border-top: 1px solid var(--rule); }
+    .eq-explain { grid-template-columns: 1fr; }
+    .foot { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 560px) {
+    .st-row { grid-template-columns: minmax(0, 1fr) 56px; }
+    .st-row .lab { grid-column: 1 / -1; text-align: left; }
+    .gb { grid-template-columns: 1fr; gap: 6px; }
+    .gb .lab { text-align: left; }
+    .gb .pair { padding-right: 104px; }
+  }
+  @media (prefers-reduced-motion: reduce) { .eq-card, .eqn .term { transition: none; } }
 </style>
 </head>
 <body>
 
 <header class="wide">
-  <p class="venue"><strong>NeurIPS 2026</strong> &nbsp;poster</p>
-  <h1>Beyond Hard Negatives</h1>
-  <p class="sub">Grounded positive supervision for compositional CLIP</p>
+  <p class="venue">NeurIPS 2026 · Poster</p>
+
+  <div class="mark" aria-hidden="true">GPS<span class="dash">-</span>CLIP</div>
+  <div class="expand" aria-hidden="true">
+    <span style="background:var(--c-region)"><b>G</b>rounded</span>
+    <span style="background:var(--c-sub)"><b>P</b>ositive</span>
+    <span style="background:var(--c-triplet)"><b>S</b>upervision</span>
+  </div>
+
+  <h1 class="title">Beyond Hard Negatives: <i>Grounded Positive Supervision for Compositional CLIP</i></h1>
 
   <div class="authors">
     <span>Harsh Udai<sup>1</sup></span>
@@ -317,8 +461,22 @@
       <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 .5C5.65.5.5 5.65.5 12a11.5 11.5 0 0 0 7.86 10.92c.58.1.79-.25.79-.56v-2c-3.2.7-3.87-1.37-3.87-1.37-.53-1.33-1.28-1.69-1.28-1.69-1.05-.71.08-.7.08-.7 1.16.08 1.77 1.19 1.77 1.19 1.03 1.77 2.7 1.26 3.36.96.1-.75.4-1.26.73-1.55-2.55-.29-5.24-1.28-5.24-5.69 0-1.26.45-2.29 1.19-3.1-.12-.29-.52-1.46.11-3.05 0 0 .97-.31 3.17 1.18a11 11 0 0 1 5.77 0c2.2-1.49 3.17-1.18 3.17-1.18.63 1.59.23 2.76.11 3.05.74.81 1.19 1.84 1.19 3.1 0 4.42-2.7 5.39-5.26 5.68.41.36.78 1.06.78 2.14v3.17c0 .31.21.67.8.56A11.5 11.5 0 0 0 23.5 12C23.5 5.65 18.35.5 12 .5z"/></svg>
       Code
     </a>
-    <a class="link quiet" href="#bibtex">Cite</a>
+    <a class="link quiet" href="#bibtex">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M8 7l-4 5 4 5M16 7l4 5-4 5"/></svg>
+      BibTeX
+    </a>
   </nav>
+
+  <!-- TL;DR + headline gains (CLIP ViT-B/32 → GPS-CLIP, Table 1) -->
+  <div class="tldr">
+    <p class="tldr-text" style="margin:0"><span class="tag">TL;DR</span>Instead of training CLIP to reject edited captions, GPS-CLIP pulls each image toward its own regions and relation triplets. Same encoder at inference, no extra cost.</p>
+    <div class="stats">
+      <div class="stat"><b>+11.5</b><span>SugarCrepe avg</span><small>71.8 → 83.3</small></div>
+      <div class="stat"><b>+8.3</b><span>Retrieval R@1</span><small>54.7 → 62.9</small></div>
+      <div class="stat"><b>+7.8</b><span>COLA</span><small>22.9 → 30.6</small></div>
+      <div class="stat"><b>+2.2</b><span>ImageNetV2</span><small>56.0 → 58.1</small></div>
+    </div>
+  </div>
 
   <!-- Signature element: the paper's Fig. 1 as a hands-on probe -->
   <div class="probe" id="probe">
@@ -357,8 +515,35 @@
     <div class="read">
       <h2>The idea</h2>
       <p class="lede">CLIP knows <em>what</em> is in an image but often not <em>how it fits together</em>. Most fixes train it to reject edited "hard negative" captions. GPS-CLIP does the opposite: it pulls the image toward its own grounded structure, its regions, their descriptions, and the relations between them.</p>
-      <p>Scene graphs are used only while fine-tuning. The model you deploy is a plain CLIP dual encoder with the same architecture, the same inputs, and no extra inference cost.</p>
     </div>
+    <div class="versus">
+      <div class="vs-col old">
+        <span class="k">Most fixes · hard negatives</span>
+        <h3>Push the image away from edited captions</h3>
+        <svg class="vs-svg" viewBox="0 0 300 96" aria-hidden="true">
+          <rect x="4" y="30" width="56" height="40" rx="8" style="fill:var(--c-image)"/><text x="16" y="55">image</text>
+          <rect x="160" y="8" width="136" height="30" rx="8" style="fill:var(--paper);stroke:var(--rule)"/><text x="170" y="28">dog chasing frisbee</text>
+          <rect x="160" y="58" width="136" height="30" rx="8" style="fill:var(--neg-tint)"/><text x="170" y="78">frisbee chasing dog</text>
+          <path d="M64 50 L156 24" style="stroke:var(--muted);fill:none;stroke-width:1.5"/>
+          <path d="M64 54 L156 72" style="stroke:var(--neg);fill:none;stroke-width:1.5;stroke-dasharray:4 4"/>
+          <text class="t-m" x="96" y="90">push apart</text>
+        </svg>
+        <ul><li>Learns to spot word swaps</li><li>Often costs zero-shot and retrieval accuracy</li></ul>
+      </div>
+      <div class="vs-col new">
+        <span class="k">GPS-CLIP · grounded positives</span>
+        <h3>Pull the image toward its own structure</h3>
+        <svg class="vs-svg" viewBox="0 0 300 96" aria-hidden="true">
+          <rect x="4" y="30" width="56" height="40" rx="8" style="fill:var(--c-image)"/><text x="16" y="55">image</text>
+          <rect x="160" y="2" width="70" height="26" rx="7" style="fill:var(--c-sub)"/><text x="178" y="20">region</text>
+          <rect x="160" y="35" width="136" height="26" rx="13" style="fill:var(--c-triplet)"/><text x="170" y="53">⟨dog, chasing, frisbee⟩</text>
+          <rect x="160" y="68" width="100" height="26" rx="7" style="fill:var(--c-caption)"/><text x="170" y="86">full caption</text>
+          <path d="M64 46 L156 16 M64 50 L156 48 M64 54 L156 80" style="stroke:var(--pos);fill:none;stroke-width:1.6"/>
+        </svg>
+        <ul><li>Learns regions and who-does-what-to-whom</li><li>Keeps or improves zero-shot and retrieval</li></ul>
+      </div>
+    </div>
+    <p class="note">Scene graphs are used only while fine-tuning. The model you deploy is a plain CLIP dual encoder with the same architecture, the same inputs, and no extra inference cost.</p>
   </section>
 
   <section>
@@ -370,19 +555,19 @@
       <figcaption><b>Structured contrastive training at a glance.</b> Region and sub-region crops, their descriptions, and ⟨subject, relation, object⟩ triplets are aligned in the shared embedding space alongside the usual image–caption pairs.</figcaption>
     </figure>
 
-    <div class="losses">
-      <div class="loss">
-        <h3><i style="background:var(--c-caption)"></i>Global</h3>
-        <p>The standard image–caption contrastive loss, <span class="eq">ℒ</span><sub>global</sub>. Kept as is, so zero-shot ability is preserved.</p>
-      </div>
-      <div class="loss">
-        <h3><i style="background:var(--c-sub)"></i>Region</h3>
-        <p>Image sub-regions are matched to their text spans, <span class="eq">ℒ</span><sub>region</sub>. Overlapping regions count as weighted positives instead of being pushed apart.</p>
-      </div>
-      <div class="loss">
-        <h3><i style="background:var(--c-triplet)"></i>Relation</h3>
-        <p>Each image is aligned with its ⟨s, r, o⟩ triplets, <span class="eq">ℒ</span><sub>relation</sub>. Order matters: "dog chasing frisbee" is not "frisbee chasing dog".</p>
-      </div>
+    <div class="eqn" role="group" aria-label="Training objective">
+      <i>ℒ</i> =
+      <button class="term" type="button" data-t="0" aria-pressed="false" style="background:var(--c-caption)"><i>ℒ</i><sub>global</sub></button>
+      + <span class="lam">λ<sub>r</sub></span>
+      <button class="term" type="button" data-t="1" aria-pressed="false" style="background:var(--c-sub)"><i>ℒ</i><sub>region</sub></button>
+      + <span class="lam">λ<sub>t</sub></span>
+      <button class="term" type="button" data-t="2" aria-pressed="false" style="background:var(--c-triplet)"><i>ℒ</i><sub>relation</sub></button>
+    </div>
+    <p class="eq-hint">Click a term to focus on it.</p>
+    <div class="eq-explain" id="eqx">
+      <div class="eq-card"><b><em style="background:var(--c-caption)"></em>Global</b>The standard image–caption contrastive loss. Kept as is, so zero-shot ability is preserved.</div>
+      <div class="eq-card"><b><em style="background:var(--c-sub)"></em>Region</b>Image sub-regions are matched to their text spans. Overlapping regions count as weighted positives instead of being pushed apart.</div>
+      <div class="eq-card"><b><em style="background:var(--c-triplet)"></em>Relation</b>Each image is aligned with its ⟨s, r, o⟩ triplets. Order matters: "dog chasing frisbee" is not "frisbee chasing dog".</div>
     </div>
   </section>
 
@@ -393,8 +578,34 @@
     </div>
     <figure>
       <div class="plate"><a href="static/images/region-loss.png" aria-label="Open full-size region loss figure"><img src="static/images/region-loss.png" alt="Similarity grid between image sub-regions and sub-region descriptions, marked positive, masked, or negative"></a></div>
-      <figcaption><b>IoU-weighted region–phrase loss.</b> In the ablations, masking same-image pairs adds +1.46 points on average and IoU weighting a further +2.74. Simply adding scene-graph data to a standard loss gains only +0.27.</figcaption>
+      <figcaption><b>IoU-weighted region–phrase loss.</b> Pairs of regions from the same image are weighted by how much they overlap, instead of all being treated as negatives.</figcaption>
     </figure>
+
+    <!-- TODO: check the threshold and weighting rule in the script against the paper's region-loss definition -->
+    <div class="iou">
+      <svg viewBox="0 0 360 220" role="img" aria-label="Two region boxes overlapping">
+        <rect class="bx-a" x="60" y="50" width="130" height="120" rx="6"/>
+        <rect class="bx-b" id="bbox" x="150" y="70" width="130" height="110" rx="6"/>
+        <rect class="bx-i" id="ibox" x="0" y="0" width="0" height="0"/>
+        <text x="66" y="44">region A · "brown dog"</text>
+        <text id="blab" x="156" y="198">region B · "dog's head"</text>
+      </svg>
+      <div>
+        <label for="slide">Drag to move region B</label>
+        <input id="slide" type="range" min="0" max="200" value="90">
+        <dl class="readout">
+          <dt>IoU</dt><dd id="iouv">0.00</dd>
+          <dt>Standard loss</dt><dd><span class="pill neg">negative</span></dd>
+          <dt>GPS-CLIP</dt><dd id="gps"></dd>
+        </dl>
+      </div>
+    </div>
+
+    <div class="stairs-wrap">
+      <h3>Where the gain comes from</h3>
+      <p class="note" style="margin-top:0">Average points gained at each step of the region-loss design, from the ablations.</p>
+      <div class="stairs" id="stairs"></div>
+    </div>
   </section>
 
   <section>
@@ -402,26 +613,49 @@
       <h2>Results</h2>
       <p>Fine-tuned from CLIP ViT-B/32, GPS-CLIP improves every benchmark we report, including zero-shot ImageNet and retrieval, which hard-negative methods often trade away.</p>
     </div>
-
-    <div class="dots" id="dots">
-      <div class="dots-legend" aria-hidden="true">
-        <span><i class="dot-key" style="background:var(--base)"></i>CLIP</span>
-        <span><i class="dot-key" style="background:var(--pos)"></i>GPS-CLIP</span>
-      </div>
-      <div id="dotRows"></div>
-      <div class="ticks" aria-hidden="true"><span></span><div><span>0</span><span>25</span><span>50</span><span>75</span><span>100</span></div><span></span></div>
+    <div class="seg-tabs" role="tablist" aria-label="Benchmark group" id="resTabs">
+      <button role="tab" type="button" aria-selected="true" data-g="comp">Compositional</button>
+      <button role="tab" type="button" aria-selected="false" data-g="gen">Zero-shot &amp; retrieval</button>
     </div>
+    <div class="gbars" id="gbars" role="tabpanel"></div>
+    <div class="legend"><span><em style="background:var(--base)"></em>CLIP ViT-B/32</span><span><em style="background:var(--pos)"></em>GPS-CLIP</span></div>
     <p class="small-note">Accuracy or Recall@1 (%), from Table 1. Comparisons with NegCLIP, TripletCLIP, DAC, CLoVe, CE-CLIP, FSC-CLIP and CLIC are in the paper.</p>
   </section>
 
   <section>
-    <div class="read"><h2>Why it's practical</h2></div>
-    <ul class="facts">
-      <li><b>Nothing new at inference</b>Same dual encoder, no added parameters, latency or FLOPs.</li>
-      <li><b>Training-time structure only</b>Scene graphs come from an offline multimodal model and are dropped after fine-tuning.</li>
-      <li><b>Tolerates noisy graphs</b>Performance degrades gracefully when region spans and triplets are corrupted.</li>
-      <li><b>Loss- and scale-agnostic</b>Works with InfoNCE and SigLIP-style sigmoid losses, and scales to ViT-L/14.</li>
-    </ul>
+    <div class="read"><h2>Why it's practical</h2>
+      <p>All the extra machinery lives on the training side. What you deploy is an ordinary CLIP.</p>
+    </div>
+    <div class="spec">
+      <div><h3>At training time</h3>
+        <dl>
+          <dt>Scene graphs</dt><dd>From an offline multimodal model</dd>
+          <dt>Extra losses</dt><dd>Region + relation</dd>
+          <dt>Noisy graphs</dt><dd>Degrades gracefully</dd>
+          <dt>Loss family</dt><dd>InfoNCE or SigLIP</dd>
+          <dt>Scale</dt><dd>ViT-B/32 to ViT-L/14</dd>
+        </dl></div>
+      <div><h3>At inference time</h3>
+        <dl>
+          <dt>Architecture</dt><dd class="same">Same as CLIP</dd>
+          <dt>Parameters</dt><dd class="same">+0</dd>
+          <dt>Latency</dt><dd class="same">Unchanged</dd>
+          <dt>FLOPs</dt><dd class="same">Unchanged</dd>
+          <dt>Inputs</dt><dd class="same">Image + text only</dd>
+        </dl></div>
+    </div>
+  </section>
+
+  <section id="usage">
+    <div class="read"><h2>Use GPS-CLIP</h2>
+      <p>GPS-CLIP loads like any CLIP checkpoint. Swap it into existing code without other changes.</p>
+    </div>
+    <!-- TODO: replace the checkpoint path / Hugging Face id in the script once released -->
+    <div class="ctabs" role="tablist" aria-label="Library">
+      <button role="tab" type="button" aria-selected="true" data-c="oc">open_clip</button>
+      <button role="tab" type="button" aria-selected="false" data-c="hf">transformers</button>
+    </div>
+    <div class="code"><button class="copy" type="button" id="codeCopy">Copy</button><pre id="codeBox"></pre></div>
   </section>
 
   <section id="bibtex">
@@ -440,8 +674,13 @@
 </main>
 
 <footer class="wide">
-  GPS-CLIP · <a href="https://github.com/Harsh-Udai/GPS-CLIP">github.com/Harsh-Udai/GPS-CLIP</a>
+  <div class="foot">
+    <div><div class="wm">GPS<span>-</span>CLIP</div><p>Beyond Hard Negatives · NeurIPS 2026</p></div>
+    <div><b>Links</b>Paper (soon) · arXiv (soon)<br><a href="https://github.com/Harsh-Udai/GPS-CLIP">GitHub</a> · <a href="#bibtex">BibTeX</a></div>
+    <div><b>Authors</b>Harsh Udai, Konda Reddy Mopuri, Vineeth N. Balasubramanian<br>IIT Hyderabad · Microsoft Research India</div>
+  </div>
 </footer>
+
 
 <script>
 (function () {
@@ -539,49 +778,82 @@
   });
   load(0);
 
-  /* Results dot plot, values from Table 1 (CLIP ViT-B/32 vs GPS-CLIP). */
-  var R = [
-    ["COLA", "multi-object binding", 22.86, 30.64],
-    ["What'sUp", "spatial relations", 41.77, 47.38],
-    ["Winoground", "group score", 16.40, 18.35],
-    ["SugarCrepe", "add", 72.68, 94.78],
-    ["SugarCrepe", "replace", 80.02, 84.00],
-    ["SugarCrepe", "swap", 62.60, 70.75],
-    ["SugarCrepe++", "replace", 68.68, 76.17],
-    ["SugarCrepe++", "swap", 43.07, 49.79],
-    ["MMVP-VLM", "fine-grained perception", 27.42, 33.33],
-    ["ImageNetV2", "zero-shot top-1", 55.96, 58.11],
-    ["Retrieval", "COCO + Flickr30k, R@1", 54.67, 62.92]
-  ];
-  var host = document.getElementById("dotRows");
-  R.forEach(function (r) {
-    var d = document.createElement("div");
-    d.className = "drow";
-    d.setAttribute("role", "group");
-    d.setAttribute("aria-label", r[0] + " " + r[1] + ": CLIP " + r[2] + ", GPS-CLIP " + r[3]);
-    d.innerHTML =
-      '<div class="lab">' + r[0] + '<small>' + r[1] + '</small></div>' +
-      '<div class="line" aria-hidden="true">' +
-        '<span class="seg" style="left:' + r[2] + '%;width:' + (r[3] - r[2]) + '%"></span>' +
-        '<span class="dot b" style="left:' + r[2] + '%" title="CLIP ' + r[2].toFixed(2) + '"></span>' +
-        '<span class="dot g" style="left:' + r[3] + '%" title="GPS-CLIP ' + r[3].toFixed(2) + '"></span>' +
-      '</div>' +
-      '<div class="delta">+' + (r[3] - r[2]).toFixed(2) + '</div>';
-    host.appendChild(d);
+  /* Objective: click a term to focus its card */
+  var terms = document.querySelectorAll(".eqn .term"), eqx = document.getElementById("eqx"), eqCards = eqx.querySelectorAll(".eq-card");
+  terms.forEach(function (t) {
+    t.addEventListener("click", function () {
+      var on = t.getAttribute("aria-pressed") !== "true";
+      terms.forEach(function (o) { o.setAttribute("aria-pressed", "false"); });
+      eqCards.forEach(function (c) { c.classList.remove("on"); });
+      eqx.classList.toggle("focus", on);
+      if (on) { t.setAttribute("aria-pressed", "true"); eqCards[+t.getAttribute("data-t")].classList.add("on"); }
+    });
   });
 
-  /* Copy BibTeX */
-  document.getElementById("copyBtn").addEventListener("click", function () {
-    var btn = this, text = document.getElementById("bib").innerText;
-    function done() { btn.textContent = "Copied"; setTimeout(function () { btn.textContent = "Copy"; }, 1500); }
-    if (navigator.clipboard && navigator.clipboard.writeText) {
-      navigator.clipboard.writeText(text).then(done, function () {});
-    } else {
-      var ta = document.createElement("textarea"); ta.value = text; document.body.appendChild(ta); ta.select();
-      try { document.execCommand("copy"); done(); } catch (e) {}
-      document.body.removeChild(ta);
-    }
+  /* IoU demo (illustrative rule: overlap > 0 → positive weighted by IoU; no overlap → masked) */
+  var BA = { x: 60, y: 50, w: 130, h: 120 }, BB = { y: 70, w: 130, h: 110 };
+  var slide = document.getElementById("slide"), bbox = document.getElementById("bbox"), ibox = document.getElementById("ibox"), blab = document.getElementById("blab");
+  var iouv = document.getElementById("iouv"), gps = document.getElementById("gps");
+  function updIoU() {
+    var bx = 20 + +slide.value;
+    bbox.setAttribute("x", bx); blab.setAttribute("x", Math.min(bx + 6, 200));
+    var ix = Math.max(BA.x, bx), iy = Math.max(BA.y, BB.y);
+    var iw = Math.max(0, Math.min(BA.x + BA.w, bx + BB.w) - ix), ih = Math.max(0, Math.min(BA.y + BA.h, BB.y + BB.h) - iy), inter = iw * ih;
+    var iou = inter / (BA.w * BA.h + BB.w * BB.h - inter);
+    ibox.setAttribute("x", ix); ibox.setAttribute("y", iy); ibox.setAttribute("width", iw); ibox.setAttribute("height", ih);
+    iouv.textContent = iou.toFixed(2);
+    gps.innerHTML = iou > 0 ? '<span class="pill pos">positive · weight ' + iou.toFixed(2) + '</span>' : '<span class="pill mask">masked (same image)</span>';
+  }
+  slide.addEventListener("input", updIoU); updIoU();
+
+  /* Ablation staircase */
+  var S = [["Add scene-graph data", "standard contrastive loss", 0.27], ["+ Mask same-image pairs", "no false negatives", 1.46], ["+ IoU weighting", "overlap as soft positives", 2.74]];
+  var st = document.getElementById("stairs"), acc = 0, smax = 0.27 + 1.46 + 2.74;
+  S.forEach(function (r) {
+    var left = acc / smax * 100, w = r[2] / smax * 100; acc += r[2];
+    st.insertAdjacentHTML("beforeend", '<div class="st-row"><div class="lab">' + r[0] + '<small>' + r[1] + '</small></div><div class="st-track">' + (left > 0 ? '<div class="st-bar" style="left:0;width:' + left + '%;background:var(--pos-tint)"></div>' : '') + '<div class="st-bar" style="left:' + left + '%;width:' + w + '%;background:var(--pos)"></div></div><div class="st-val">+' + r[2].toFixed(2) + '</div></div>');
   });
+  st.insertAdjacentHTML("beforeend", '<div class="st-row st-total"><div class="lab"><b>Total</b><small>over the standard loss</small></div><div></div><div class="st-val">+' + acc.toFixed(2) + '</div></div>');
+
+  /* Results, Table 1 (CLIP ViT-B/32 vs GPS-CLIP) */
+  var RES = {
+    comp: [["SugarCrepe", "average", 71.77, 83.30], ["SugarCrepe++", "average", 55.88, 65.62], ["COLA", "multi-object binding", 22.86, 30.64], ["What'sUp", "spatial relations", 41.77, 47.38], ["Winoground", "group score", 16.40, 18.35], ["MMVP-VLM", "fine-grained perception", 27.42, 33.33]],
+    gen: [["ImageNetV2", "zero-shot top-1", 55.96, 58.11], ["Retrieval", "COCO + Flickr30k, R@1", 54.67, 62.92]]
+  };
+  var gbars = document.getElementById("gbars"), resTabs = document.querySelectorAll("#resTabs button");
+  function showRes(g) {
+    resTabs.forEach(function (b) { b.setAttribute("aria-selected", b.getAttribute("data-g") === g ? "true" : "false"); });
+    gbars.innerHTML = "";
+    RES[g].forEach(function (r) {
+      gbars.insertAdjacentHTML("beforeend",
+        '<div class="gb" role="group" aria-label="' + r[0] + ': CLIP ' + r[2].toFixed(2) + ', GPS-CLIP ' + r[3].toFixed(2) + '">' +
+        '<div class="lab">' + r[0] + '<small>' + r[1] + '</small></div>' +
+        '<div class="pair" aria-hidden="true"><div class="b c" style="width:' + r[2] + '%"><span>' + r[2].toFixed(2) + '</span></div>' +
+        '<div class="b g" style="width:' + r[3] + '%"><span>' + r[3].toFixed(2) + '  +' + (r[3] - r[2]).toFixed(2) + '</span></div></div></div>');
+    });
+  }
+  resTabs.forEach(function (b) { b.addEventListener("click", function () { showRes(b.getAttribute("data-g")); }); });
+  showRes("comp");
+
+  /* Usage snippets (TODO: real checkpoint names) */
+  var CODE = {
+    oc: '<span class="k">import</span> torch, open_clip\n<span class="k">from</span> PIL <span class="k">import</span> Image\n\n<span class="c"># TODO: replace with the released checkpoint</span>\nmodel, _, preprocess = open_clip.create_model_and_transforms(\n    "ViT-B-32", pretrained="path/to/gps-clip-vitb32.pt")\ntokenizer = open_clip.get_tokenizer("ViT-B-32")\n\nimage = preprocess(Image.open("scene.jpg")).unsqueeze(0)\ntext = tokenizer(["a dog chasing a frisbee", "a frisbee chasing a dog"])\n\n<span class="k">with</span> torch.no_grad():\n    img = model.encode_image(image)\n    txt = model.encode_text(text)\n    img /= img.norm(dim=-1, keepdim=True)\n    txt /= txt.norm(dim=-1, keepdim=True)\n    print((100 * img @ txt.T).softmax(dim=-1))',
+    hf: '<span class="k">import</span> torch\n<span class="k">from</span> PIL <span class="k">import</span> Image\n<span class="k">from</span> transformers <span class="k">import</span> CLIPModel, CLIPProcessor\n\n<span class="c"># TODO: replace with the released Hugging Face repo id</span>\nmodel = CLIPModel.from_pretrained("your-hf-id/GPS-CLIP-ViT-B-32")\nprocessor = CLIPProcessor.from_pretrained("openai/clip-vit-base-patch32")\n\ninputs = processor(text=["a dog chasing a frisbee", "a frisbee chasing a dog"],\n                   images=Image.open("scene.jpg"), return_tensors="pt", padding=True)\n<span class="k">with</span> torch.no_grad():\n    print(model(**inputs).logits_per_image.softmax(dim=-1))'
+  };
+  var codeBox = document.getElementById("codeBox"), ctabs = document.querySelectorAll(".ctabs button");
+  function showCode(k) { ctabs.forEach(function (b) { b.setAttribute("aria-selected", b.getAttribute("data-c") === k ? "true" : "false"); }); codeBox.innerHTML = CODE[k]; }
+  ctabs.forEach(function (b) { b.addEventListener("click", function () { showCode(b.getAttribute("data-c")); }); });
+  showCode("oc");
+
+  /* Copy buttons (code + BibTeX) */
+  function copyFrom(btn, el) {
+    var text = el.innerText;
+    function done() { btn.textContent = "Copied"; setTimeout(function () { btn.textContent = "Copy"; }, 1500); }
+    function fallback() { var r = document.createRange(); r.selectNodeContents(el); var sel = window.getSelection(); sel.removeAllRanges(); sel.addRange(r); }
+    try { navigator.clipboard.writeText(text).then(done, fallback); } catch (e) { fallback(); }
+  }
+  document.getElementById("codeCopy").addEventListener("click", function () { copyFrom(this, codeBox); });
+  document.getElementById("copyBtn").addEventListener("click", function () { copyFrom(this, document.getElementById("bib")); });
 })();
 </script>
 </body>
